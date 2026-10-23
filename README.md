@@ -35,9 +35,6 @@ The main idea behind this project is to bring useful Islamic features together i
 
 [Hayat - Islamic Life Organizer](https://rubaiya17.github.io/Hayat-Iskamic-Organizer/)
 
-## Source Code
-
-[GitHub Repository](https://github.com/rubaiya17/Hayat-Iskamic-Organizer)
 
 ## Note
 
