@@ -1,0 +1,2178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- 1. Basic HTML Setup -->
+    <!-- Sets the character encoding and makes the website responsive. -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Sets the website title shown in the browser tab. -->
+    <title>Hayat — Islamic Life Organizer</title>
+
+    <!-- Loads Tailwind CSS for utility-based styling. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- 2. Custom CSS Styles -->
+    <!-- Defines the website colors, layout, buttons, cards, and responsive design. -->
+    <style>
+        :root {
+            --bg: #f8f5ef;
+            --paper: #fffdf9;
+            --gold: #b99a62;
+            --ink: #302d2a;
+            --muted: #81796f;
+            --line: #e9e2d6;
+            --soft: #f0e8db
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--ink);
+            font-family: Arial, sans-serif
+        }
+
+        .serif {
+            font-family: Georgia, serif
+        }
+
+        .card {
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 17px;
+            padding: 20px
+        }
+
+        .field {
+            width: 100%;
+            padding: 11px;
+            border: 1px solid var(--line);
+            border-radius: 9px;
+            background: #fbf8f2;
+            margin-top: 7px;
+            outline: none
+        }
+
+        .field:focus {
+            border-color: var(--gold)
+        }
+
+        .btn {
+            background: var(--gold);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 9px;
+            border: 1px solid var(--gold)
+        }
+
+        .btn:hover {
+            background: #927344
+        }
+
+        .outline {
+            background: var(--paper);
+            border: 1px solid #dfd3c0;
+            padding: 9px 13px;
+            border-radius: 9px
+        }
+
+        .outline:hover {
+            background: var(--soft)
+        }
+
+        .nav {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 12px;
+            border-radius: 9px;
+            color: #756d62;
+            margin: 3px 0
+        }
+
+        .nav:hover,
+        .nav.active {
+            background: var(--soft);
+            color: #806238
+        }
+
+        .page {
+            display: none;
+            animation: fade .2s ease
+        }
+
+        .page.active {
+            display: block
+        }
+
+        /* Adds a small animation when changing pages. */
+        @keyframes fade {
+            from {
+                opacity: .5;
+                transform: translateY(3px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        /* Styles progress bars and their filled portions. */
+        .track {
+            height: 7px;
+            background: #eee7dc;
+            border-radius: 8px;
+            overflow: hidden
+        }
+
+        .fill {
+            height: 100%;
+            background: var(--gold);
+            border-radius: 8px;
+            transition: width .2s
+        }
+
+        /* Styles the buttons used to mark tasks as complete or incomplete. */
+        .status {
+            width: 34px;
+            height: 34px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: white
+        }
+
+        .status.yes {
+            background: var(--gold);
+            border-color: var(--gold);
+            color: white
+        }
+
+        .status.no {
+            background: #f6e7e1;
+            border-color: #e8cec5;
+            color: #8e554a
+        }
+
+        /* Styles Arabic text and small section labels. */
+        .arabic {
+            font-family: Georgia, serif;
+            direction: rtl;
+            font-size: 25px;
+            line-height: 2.1
+        }
+
+        .small-label {
+            font-size: 11px;
+            letter-spacing: 1.8px;
+            color: var(--muted)
+        }
+
+        /* Arranges checklist items in rows. */
+        .task-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 13px 0;
+            border-bottom: 1px solid var(--line)
+        }
+
+        .task-row:last-child {
+            border-bottom: 0
+        }
+
+        /* Styles small labels and table cells. */
+        .pill {
+            font-size: 11px;
+            border: 1px solid #dfd3c0;
+            padding: 4px 8px;
+            border-radius: 30px;
+            color: #806238
+        }
+
+        .day-cell {
+            min-width: 145px
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%
+        }
+
+        th,
+        td {
+            padding: 11px;
+            border-bottom: 1px solid var(--line);
+            text-align: left;
+            font-size: 13px
+        }
+
+        th {
+            background: var(--soft);
+            font-weight: 600
+        }
+
+        /* Displays short notification messages at the bottom of the page. */
+        #toast {
+            position: fixed;
+            bottom: 18px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            background: var(--ink);
+            color: white;
+            padding: 12px 18px;
+            border-radius: 10px;
+            display: none
+        }
+
+        /* Adjusts the layout for mobile screens. */
+        @media(max-width:700px) {
+            #layout {
+                display: block !important;
+                padding: 13px !important
+            }
+
+            #sidebar {
+                display: none
+            }
+
+            #mobileNav {
+                display: flex !important
+            }
+
+            .hero {
+                font-size: 31px !important
+            }
+
+            .card {
+                padding: 16px
+            }
+
+            .calendar-wrap {
+                overflow-x: auto
+            }
+        }
+
+        /* Hides the mobile navigation on larger screens. */
+        @media(min-width:701px) {
+            #mobileNav {
+                display: none !important
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- 3. Website Header -->
+    <!-- Shows the Hayat logo, website name, current date, and tagline. -->
+    <header style="background:var(--paper);border-bottom:1px solid var(--line);padding:15px 20px;position:sticky;top:0;z-index:30">
+        <div style="max-width:1250px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:12px">
+
+            <!-- Clicking the logo opens the Dashboard. -->
+            <button onclick="showPage('dashboard')" style="display:flex;align-items:center;gap:12px;background:none;border:0;text-align:left">
+                <span style="background:var(--ink);color:var(--gold);border-radius:13px;padding:10px 15px;font-size:25px">☾</span>
+                <span>
+                    <span class="serif" style="font-size:29px">Hayat</span>
+                    <small style="display:block;color:var(--muted);letter-spacing:2px;font-size:10px">YOUR ISLAMIC LIFE ORGANIZER</small>
+                </span>
+            </button>
+
+            <!-- JavaScript inserts the selected date here. -->
+            <div style="text-align:right;font-size:13px">
+                <div id="headerDate"></div>
+                <div style="color:var(--muted);margin-top:4px">Grow with intention</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 4. Mobile Navigation -->
+    <!-- Provides navigation buttons for smaller screens. -->
+    <nav id="mobileNav" style="display:none;gap:6px;overflow-x:auto;padding:10px;background:var(--paper);border-bottom:1px solid var(--line)">
+        <button class="outline" onclick="showPage('dashboard')">Home</button>
+        <button class="outline" onclick="showPage('salah')">Salah</button>
+        <button class="outline" onclick="showPage('prayerTimes')">Prayer Times</button>
+        <button class="outline" onclick="showPage('quran')">Quran</button>
+        <button class="outline" onclick="showPage('hadith')">Hadith</button>
+        <button class="outline" onclick="showPage('duas')">Duas</button>
+        <button class="outline" onclick="showPage('ramadan')">Ramadan</button>
+        <button class="outline" onclick="showPage('reflection')">Daily Tracker</button>
+    </nav>
+
+    <!-- 5. Main Layout and Sidebar -->
+    <!-- Creates a sidebar beside the main content on desktop screens. -->
+    <div id="layout" style="max-width:1250px;margin:auto;padding:24px;display:grid;grid-template-columns:220px minmax(0,1fr);gap:24px">
+
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar">
+            <div class="card" style="position:sticky;top:100px;padding:12px">
+                <p class="small-label" style="padding:8px">YOUR SPACE</p>
+
+                <!-- Each button opens a different website section. -->
+                <button class="nav active" data-nav="dashboard" onclick="showPage('dashboard')">⌂ &nbsp; Dashboard</button>
+                <button class="nav" data-nav="salah" onclick="showPage('salah')">☾ &nbsp; Daily Salah</button>
+                <button class="nav" data-nav="prayerTimes" onclick="showPage('prayerTimes')">◷ &nbsp; Prayer Times</button>
+                <button class="nav" data-nav="quran" onclick="showPage('quran')">▤ &nbsp; Quran Tracker</button>
+                <button class="nav" data-nav="hadith" onclick="showPage('hadith')">✧ &nbsp; Hadith Collection</button>
+                <button class="nav" data-nav="duas" onclick="showPage('duas')">♡ &nbsp; Masnun Doa</button>
+                <button class="nav" data-nav="ramadan" onclick="showPage('ramadan')">☽ &nbsp; Ramadan Calendar</button>
+                <button class="nav" data-nav="reflection" onclick="showPage('reflection')">✓ &nbsp; Daily Tracker</button>
+
+                <!-- Displays a Quranic reminder in the sidebar. -->
+                <div style="background:var(--soft);border-radius:12px;padding:15px;margin-top:16px">
+                    <p class="serif" style="font-size:19px;line-height:1.5;margin:0">“Indeed, with hardship comes ease.”</p>
+                    <p style="font-size:12px;color:var(--muted);margin-top:8px">Quran 94:6</p>
+                </div>
+            </div>
+        </aside>
+
+        <!-- 6. Main Content Area -->
+        <!-- All website pages are displayed inside this main element. -->
+        <main style="min-width:0">
+
+            <!-- 6.1 Dashboard Page -->
+            <!-- Shows a welcome message, daily summary, and progress overview. -->
+            <section class="page active" id="dashboard">
+                <div class="card" style="padding:28px;background:linear-gradient(120deg,#fffdf9,#f0e8db)">
+                    <p class="small-label">A GENTLE SPACE FOR GROWTH</p>
+                    <h1 class="serif hero" style="font-size:39px;margin:15px 0">Assalamu Alaikum.</h1>
+                    <p style="color:#756d62;line-height:1.9">Make room for worship, learning, good character and reflection. Small consistent steps matter.</p>
+
+                    <!-- Shortcuts to the Salah and Daily Tracker pages. -->
+                    <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:20px">
+                        <button class="btn" onclick="showPage('salah')">Track Salah →</button>
+                        <button class="outline" onclick="showPage('reflection')">Daily checklist</button>
+                    </div>
+                </div>
+
+                <!-- Allows the user to choose a date for the daily overview. -->
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:24px 0 14px">
+                    <h2 class="serif" style="font-size:25px;margin:0">Daily Overview</h2>
+                    <input id="mainDate" type="date" class="field" style="width:auto;margin:0" onchange="changeDate(this.value)">
+                </div>
+
+                <!-- Summary cards show daily progress for Salah, Quran, habits, and completion. -->
+                <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div class="card">
+                        <p class="text-sm text-gray-500">Salah completed</p>
+                        <h2 id="dashSalah" class="text-2xl my-3">0/5</h2>
+                        <div class="track">
+                            <div id="dashSalahBar" class="fill" style="width:0"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <p class="text-sm text-gray-500">Quran pages</p>
+                        <h2 id="dashPages" class="text-2xl my-3">0</h2>
+                        <div class="track">
+                            <div id="dashQuranBar" class="fill" style="width:0"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <p class="text-sm text-gray-500">Good habits</p>
+                        <h2 id="dashHabits" class="text-2xl my-3">0</h2>
+                        <div class="track">
+                            <div id="dashHabitsBar" class="fill" style="width:0"></div>
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <p class="text-sm text-gray-500">Daily completion</p>
+                        <h2 id="dashTotal" class="text-2xl my-3">0%</h2>
+                        <div class="track">
+                            <div id="dashTotalBar" class="fill" style="width:0"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Displays the current day's prayer status. -->
+                <div class="card" style="margin-top:18px">
+                    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+                        <h2 class="serif" style="font-size:23px">Today's Salah</h2>
+                        <button class="outline" onclick="showPage('salah')">Update</button>
+                    </div>
+                    <div id="dashPrayerList" style="margin-top:10px"></div>
+                </div>
+
+                <!-- Displays progress toward the daily Quran reading goal. -->
+                <div class="card" style="margin-top:18px">
+                    <h2 class="serif" style="font-size:23px">Quran Goal</h2>
+                    <p id="dashQuranText" style="color:var(--muted);margin:12px 0">0 of 2 pages</p>
+                    <div class="track">
+                        <div id="dashQuranDetail" class="fill" style="width:0"></div>
+                    </div>
+                </div>
+
+                <!-- Displays a Quranic reminder. -->
+                <div class="card" style="margin-top:18px">
+                    <h2 class="serif" style="font-size:23px">A Reminder</h2>
+                    <p style="line-height:1.8;margin-top:10px">“And whoever relies upon Allah — then He is sufficient for him.”</p>
+                    <p style="font-size:12px;color:var(--muted);margin-top:8px">Quran 65:3</p>
+                </div>
+            </section>
+
+            <!-- 6.2 Daily Salah Page -->
+            <!-- Lets the user mark each prayer as completed, not completed, or unmarked. -->
+            <section id="salah" class="page">
+                <p class="small-label">WORSHIP & CONSISTENCY</p>
+                <h1 class="serif text-3xl my-3">Daily Salah</h1>
+                <p class="text-gray-500 mb-5">Choose ✓, ×, or — for each prayer. Change the date to update earlier days.</p>
+
+                <div class="card">
+                    <label>Select date</label>
+                    <input id="salahDate" type="date" class="field" onchange="changeDate(this.value)">
+
+                    <!-- Shows the number and percentage of completed prayers. -->
+                    <div class="flex justify-between mt-6">
+                        <h2 id="salahCount" class="text-xl">0 / 5</h2>
+                        <strong id="salahPercent">0%</strong>
+                    </div>
+
+                    <div class="track mt-3">
+                        <div id="salahBar" class="fill" style="width:0"></div>
+                    </div>
+
+                    <!-- JavaScript creates the five prayer status rows here. -->
+                    <div id="salahList" class="mt-4"></div>
+                    <p class="text-xs text-gray-500 mt-4">✓ Completed · × Not completed · — Unmarked</p>
+                </div>
+            </section>
+
+            <!-- 6.3 Prayer Times Page (new feature; existing sections remain unchanged) -->
+            <section id="prayerTimes" class="page">
+                <p class="small-label">DAILY WORSHIP & TIMINGS</p>
+                <h1 class="serif text-3xl my-3">Prayer Times</h1>
+                <p class="text-gray-500 mb-5">Choose a city in Bangladesh to view its daily prayer schedule.</p>
+
+                <div class="card">
+                    <label for="prayerCity">Select your city / district</label>
+                    <select id="prayerCity" class="field">
+                        <option value="Dhaka">Dhaka</option>
+                        <option value="Cumilla">Cumilla</option>
+                        <option value="Chittagong">Chattogram</option>
+                        <option value="Sylhet">Sylhet</option>
+                        <option value="Rajshahi">Rajshahi</option>
+                        <option value="Khulna">Khulna</option>
+                        <option value="Barisal">Barishal</option>
+                        <option value="Rangpur">Rangpur</option>
+                        <option value="Mymensingh">Mymensingh</option>
+                        <option value="Cox's Bazar">Cox's Bazar</option>
+                        <option value="Feni">Feni</option>
+                        <option value="Noakhali">Noakhali</option>
+                        <option value="Brahmanbaria">Brahmanbaria</option>
+                        <option value="Chandpur">Chandpur</option>
+                        <option value="Lakshmipur">Lakshmipur</option>
+                        <option value="Narayanganj">Narayanganj</option>
+                        <option value="Gazipur">Gazipur</option>
+                        <option value="Tangail">Tangail</option>
+                        <option value="Jashore">Jashore</option>
+                        <option value="Bogra">Bogura</option>
+                        <option value="Dinajpur">Dinajpur</option>
+                        <option value="Pabna">Pabna</option>
+                        <option value="Kushtia">Kushtia</option>
+                        <option value="Faridpur">Faridpur</option>
+                        <option value="Patuakhali">Patuakhali</option>
+                    </select>
+
+                    <label for="prayerTimesDate" class="block mt-4">Select date</label>
+                    <input id="prayerTimesDate" type="date" class="field">
+
+                    <button class="btn mt-4" onclick="loadPrayerTimes()">Show Prayer Times</button>
+                    <p id="prayerTimesStatus" class="text-sm text-gray-500 mt-4">Choose a city and date, then load the schedule.</p>
+                </div>
+
+                <div class="card mt-5">
+                    <div class="flex justify-between items-center gap-3 flex-wrap">
+                        <h2 class="serif text-2xl">Daily Schedule</h2>
+                        <span id="prayerTimesLocation" class="pill">Bangladesh</span>
+                    </div>
+                    <div id="prayerTimesDateLabel" class="text-sm text-gray-500 mt-2"></div>
+                    <div id="prayerTimesList" class="grid sm:grid-cols-2 gap-3 mt-4">
+                        <p class="text-sm text-gray-500">Prayer times will appear here.</p>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-5">Prayer times are calculated by an online service and may differ slightly from your local mosque's official timetable. Please verify locally when needed.</p>
+                </div>
+            </section>
+
+            <!-- 6.4 Quran Tracker Page -->
+            <!-- Records the number of pages read, daily goal, and reading notes. -->
+            <section id="quran" class="page">
+                <p class="small-label">RECITATION & REFLECTION</p>
+                <h1 class="serif text-3xl my-3">Quran Tracker</h1>
+
+                <div class="card">
+                    <label>Reading date</label>
+                    <input id="quranDate" type="date" class="field" onchange="changeDate(this.value)">
+
+                    <!-- Collects the number of pages read and the daily reading goal. -->
+                    <div class="grid sm:grid-cols-2 gap-4 mt-5">
+                        <div>
+                            <label>Pages read</label>
+                            <input id="qPages" type="number" min="0" max="604" class="field">
+                        </div>
+
+                        <div>
+                            <label>Daily goal (pages)</label>
+                            <input id="qGoal" type="number" min="1" max="604" class="field">
+                        </div>
+                    </div>
+
+                    <!-- Saves the Surah name or other reading notes. -->
+                    <label class="block mt-5">Surah / reading notes</label>
+                    <input id="qSurah" class="field" maxlength="150" placeholder="e.g. Surah Al-Kahf">
+
+                    <button class="btn mt-5" onclick="saveQuran()">Save Quran Progress</button>
+
+                    <!-- Shows the reading progress and whether the daily goal was reached. -->
+                    <div style="background:var(--soft);border-radius:12px;padding:16px;margin-top:22px">
+                        <div class="flex justify-between gap-3">
+                            <strong id="qProgress">0 / 2 pages</strong>
+                            <strong id="qPercent">0%</strong>
+                        </div>
+
+                        <div class="track mt-3">
+                            <div id="qBar" class="fill" style="width:0"></div>
+                        </div>
+
+                        <p id="qMessage" class="text-sm text-gray-600 mt-3"></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 6.4 Hadith Collection Page -->
+            <!-- Allows the user to add, view, edit, and delete personal Hadith entries. -->
+            <section id="hadith" class="page">
+                <p class="small-label">WISDOM & CHARACTER</p>
+                <h1 class="serif text-3xl my-3">Hadith Collection</h1>
+                <p class="text-gray-500 mb-5">Read reminders, save what you learn, and add your own hadith notes with references.</p>
+
+                <!-- Form for adding a Hadith with its source and personal note. -->
+                <div class="card mb-5">
+                    <h2 class="serif text-2xl">Add a Hadith</h2>
+
+                    <label class="block mt-4">Title</label>
+                    <input id="hTitle" class="field" maxlength="120" placeholder="e.g. Kindness">
+
+                    <label class="block mt-3">Hadith / translation</label>
+                    <textarea id="hText" class="field" rows="4" maxlength="3000" placeholder="Write the hadith or a short translation..."></textarea>
+
+                    <label class="block mt-3">Source / reference</label>
+                    <input id="hSource" class="field" maxlength="250" placeholder="e.g. Sahih Muslim 2593">
+
+                    <label class="block mt-3">Personal note (optional)</label>
+                    <input id="hNote" class="field" maxlength="500" placeholder="What did you learn from it?">
+
+                    <button class="btn mt-4" onclick="addHadith()">Add to My Collection</button>
+                    <p class="text-xs text-gray-500 mt-3">Always verify the wording and source before saving a hadith as authentic.</p>
+                </div>
+
+                <!-- Shows the saved Hadith entries. -->
+                <div class="flex justify-between items-center gap-3 mb-3">
+                    <h2 class="serif text-2xl">My Collection</h2>
+                    <span id="hadithCount" class="pill"></span>
+                </div>
+
+                <div id="hadithList" class="grid gap-4"></div>
+            </section>
+
+            <!-- 6.5 Masnun Doa Collection Page -->
+            <!-- Displays duas with search, category filters, favourites, and daily read status. -->
+            <section id="duas" class="page">
+                <p class="small-label">REMEMBRANCE & DAILY LIFE</p>
+                <h1 class="serif text-3xl my-3">Masnun Doa Collection</h1>
+                <p class="text-gray-500 mb-4">Browse by category, keep favourites and track what you have read.</p>
+
+                <!-- Search and filter controls for the dua collection. -->
+                <div class="card mb-5">
+                    <label>Search duas</label>
+                    <input id="duaSearch" class="field" placeholder="Search by title, category or meaning..." oninput="renderDuas()">
+
+                    <label class="block mt-4">Category</label>
+                    <select id="duaCategory" class="field" onchange="renderDuas()">
+                        <option value="all">All categories</option>
+                        <option>After Salah</option>
+                        <option>Morning & Evening</option>
+                        <option>Sleep</option>
+                        <option>Daily Life</option>
+                        <option>Food</option>
+                        <option>Travel & Mosque</option>
+                        <option>Quranic Duas</option>
+                        <option>Fasting & Ramadan</option>
+                    </select>
+
+                    <!-- Shows only favourite duas when checked. -->
+                    <label class="flex items-center gap-2 mt-4">
+                        <input id="duaFavOnly" type="checkbox" onchange="renderDuas()">
+                        Show favourites only
+                    </label>
+                </div>
+
+                <!-- JavaScript displays the matching duas here. -->
+                <div id="duaList" class="grid gap-4"></div>
+                <p class="text-xs text-gray-500 mt-5">Arabic, transliteration and translations are provided as learning aids. Verify exact wording and repetition counts with a reliable source.</p>
+            </section>
+
+            <!-- 6.6 Ramadan Planner Page -->
+            <!-- Loads monthly prayer times and provides Ramadan and Taraweeh checklists. -->
+            <section id="ramadan" class="page">
+                <p class="small-label">A SPECIAL SEASON</p>
+                <h1 class="serif text-3xl my-3">Ramadan Planner ☾</h1>
+                <p class="text-gray-500 mb-5">Choose a city and month to load daily prayer timings. Fajr is used as the suhoor cut-off reference and Maghrib as the iftar reference.</p>
+
+                <!-- Controls for selecting the city, country, month, and year. -->
+                <div class="card">
+                    <h2 class="serif text-2xl">Prayer Times Calendar</h2>
+
+                    <div class="grid sm:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <label>City</label>
+                            <input id="ramadanCity" class="field" value="Cumilla">
+                        </div>
+
+                        <div>
+                            <label>Country</label>
+                            <input id="ramadanCountry" class="field" value="Bangladesh">
+                        </div>
+
+                        <div>
+                            <label>Gregorian month</label>
+                            <select id="ramadanMonth" class="field"></select>
+                        </div>
+
+                        <div>
+                            <label>Year</label>
+                            <select id="ramadanYear" class="field"></select>
+                        </div>
+                    </div>
+
+                    <!-- Loads the selected month or returns to the current month. -->
+                    <div class="flex gap-2 flex-wrap mt-4">
+                        <button class="btn" onclick="loadRamadanCalendar()">Load Calendar</button>
+                        <button class="outline" onclick="setCurrentMonth()">Current Month</button>
+                    </div>
+
+                    <p id="calendarStatus" class="text-sm text-gray-500 mt-4">Select a month and load the calendar.</p>
+                    <p class="text-xs text-gray-500 mt-2">Calculated times may differ from your local mosque or official timetable. Confirm before using them for fasting.</p>
+                </div>
+
+                <!-- Displays the monthly timetable returned by the prayer-time API. -->
+                <div class="card mt-5">
+                    <div class="flex justify-between items-center gap-3 flex-wrap">
+                        <h2 class="serif text-2xl">Monthly Timetable</h2>
+                        <span class="pill">Suhoor · Iftar</span>
+                    </div>
+
+                    <div class="calendar-wrap mt-4">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Hijri Date</th>
+                                    <th>Suhoor ends (Fajr)</th>
+                                    <th>Iftar (Maghrib)</th>
+                                    <th>Ramadan</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="calendarBody">
+                                <tr>
+                                    <td colspan="5">Load a month to see times.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Provides a checklist for daily Ramadan activities. -->
+                <div class="card mt-5">
+                    <h2 class="serif text-2xl">Ramadan Daily Checklist</h2>
+                    <p class="text-gray-500 text-sm mt-2">Checklist saves separately for each date.</p>
+                    <div id="ramadanChecklist" class="mt-3"></div>
+                </div>
+
+                <!-- Records the Taraweeh status for the selected date. -->
+                <div class="card mt-5">
+                    <h2 class="serif text-2xl">Taraweeh Tracker</h2>
+                    <p class="text-gray-500 text-sm mt-2">Record your Taraweeh prayer for the selected date.</p>
+
+                    <label class="block mt-4">Date</label>
+                    <input id="taraweehDate" type="date" class="field" onchange="changeDate(this.value)">
+
+                    <div id="taraweehOptions" class="mt-4"></div>
+                </div>
+            </section>
+
+            <!-- 6.7 Daily Life Tracker Page -->
+            <!-- Tracks habits, daily reflections, unfinished tasks, lessons, and tomorrow's plans. -->
+            <section id="reflection" class="page">
+                <p class="small-label">SELF-ACCOUNTABILITY</p>
+                <h1 class="serif text-3xl my-3">Daily Life Tracker</h1>
+                <p class="text-gray-500 mb-5">Mark what you did today with ✓ or ×. Leave it unmarked if you haven't decided yet.</p>
+
+                <!-- Displays the daily habit checklist and completion progress. -->
+                <div class="card">
+                    <label>Tracker date</label>
+                    <input id="reflectionDate" type="date" class="field" onchange="changeDate(this.value)">
+
+                    <div class="flex justify-between items-center gap-3 mt-6">
+                        <h2 class="serif text-2xl">Today's Checklist</h2>
+                        <strong id="habitCount">0 / 0</strong>
+                    </div>
+
+                    <div class="track mt-3">
+                        <div id="habitBar" class="fill" style="width:0"></div>
+                    </div>
+
+                    <div id="habitList" class="mt-3"></div>
+                </div>
+
+                <!-- Allows the user to add a personal habit to the checklist. -->
+                <div class="card mt-5">
+                    <h2 class="serif text-2xl">Add Your Own Habit</h2>
+                    <p class="text-sm text-gray-500 mt-2">Add a checklist item that matters to you.</p>
+
+                    <div class="flex flex-col sm:flex-row gap-2 mt-4">
+                        <input id="newHabit" class="field !mt-0" maxlength="120" placeholder="e.g. Practised a new skill">
+                        <button class="btn" onclick="addHabit()">Add Habit</button>
+                    </div>
+                </div>
+
+                <!-- Collects a daily reflection and saves it for the selected date. -->
+                <div class="card mt-5">
+                    <h2 class="serif text-2xl">Daily Reflection</h2>
+                    <p class="text-sm text-gray-500 mt-2">Write a little about your day.</p>
+
+                    <label class="block mt-4">What did I do today?</label>
+                    <textarea id="rDone" class="field" rows="3" maxlength="2000" placeholder="Achievements, good deeds, important tasks..."></textarea>
+
+                    <label class="block mt-4">What could I not complete?</label>
+                    <textarea id="rMissed" class="field" rows="3" maxlength="2000" placeholder="What remains unfinished?"></textarea>
+
+                    <label class="block mt-4">What did I learn today?</label>
+                    <textarea id="rLearn" class="field" rows="3" maxlength="2000" placeholder="A lesson, skill or reminder..."></textarea>
+
+                    <label class="block mt-4">What should I improve?</label>
+                    <textarea id="rImprove" class="field" rows="3" maxlength="2000" placeholder="One thing to work on..."></textarea>
+
+                    <label class="block mt-4">Plan for tomorrow</label>
+                    <textarea id="rTomorrow" class="field" rows="3" maxlength="2000" placeholder="Write tomorrow's priorities..."></textarea>
+
+                    <button class="btn mt-5" onclick="saveReflection()">Save Daily Reflection</button>
+                </div>
+            </section>
+
+            <!-- 7. Website Footer -->
+            <!-- Displays the website name and a note about browser-based storage. -->
+            <footer style="text-align:center;color:var(--muted);font-size:12px;padding:28px 0">
+                <p class="serif" style="font-size:20px;color:var(--gold)">✧</p>
+                <p>Hayat · Islamic Life Organizer</p>
+                <p style="margin-top:6px">Your progress is saved in this browser.</p>
+            </footer>
+        </main>
+    </div>
+
+    <!-- Notification messages are displayed inside this element. -->
+    <div id="toast"></div>
+
+    <!-- 8. JavaScript Functionality -->
+    <!-- Handles navigation, daily tracking, saved data, and API requests. -->
+    <script>
+        "use strict";
+
+        // 8.1 Application Constants and Default Data
+        // Defines the storage key, prayer names, default habits, and Ramadan checklist.
+        const STORAGE_KEY = "hayat_organizer_v3";
+        const PRAYERS = ["Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"];
+
+        // Default habits shown in the Daily Life Tracker.
+        const DEFAULT_HABITS = [
+            "Performed the five daily prayers",
+            "Read at least 2 pages of Quran",
+            "Studied after Fajr",
+            "Completed my university tasks",
+            "Spent time improving a skill",
+            "Read for personal development",
+            "Avoided unnecessary phone use",
+            "Completed my daily routine",
+            "Prepared tomorrow's to-do list",
+            "Slept on time",
+            "Did not lie today",
+            "Helped at least one person",
+            "Spoke politely and respectfully",
+            "Kept my promises",
+            "Avoided gossip and hurtful speech",
+            "Thanked Allah for my blessings",
+            "Made time for dhikr or dua",
+            "Kept my study space organised",
+            "Reviewed what I learned today",
+            "Made progress on an important goal"
+        ];
+
+        // Tasks displayed in the Ramadan daily checklist.
+        const RAMADAN_TASKS = [
+            "Observed my fast (when applicable)",
+            "Read the Quran",
+            "Made time for dua and dhikr",
+            "Helped someone or gave charity",
+            "Avoided unnecessary distractions",
+            "Prepared for tomorrow"
+        ];
+
+        // 8.2 Default Hadith Collection
+        // Stores the built-in Hadith entries shown on the Hadith page.
+        const DEFAULT_HADITHS = [
+            {id: "b1", title: "Actions and intentions", text: "Actions are judged by intentions.", source: "Sahih al-Bukhari 1; Sahih Muslim 1907", note: "Check my intention before starting a task.", builtin: true},
+            {id: "b2", title: "Kindness", text: "Allah is kind and loves kindness.", source: "Sahih Muslim 2593", note: "Choose kindness in daily interactions.", builtin: true},
+            {id: "b3", title: "A good word", text: "A good word is charity.", source: "Sahih al-Bukhari 2989; Sahih Muslim 1009", note: "Use words that benefit others.", builtin: true},
+            {id: "b4", title: "Make things easy", text: "Make things easy and do not make things difficult; give glad tidings and do not drive people away.", source: "Sahih al-Bukhari 69; Sahih Muslim 1734", note: "Be helpful and considerate.", builtin: true},
+            {id: "b5", title: "Love for others", text: "None of you truly believes until he loves for his brother what he loves for himself.", source: "Sahih al-Bukhari 13; Sahih Muslim 45", note: "Treat others with fairness.", builtin: true},
+            {id: "b6", title: "Speak good or remain silent", text: "Whoever believes in Allah and the Last Day should speak good or remain silent.", source: "Sahih al-Bukhari 6018; Sahih Muslim 47", note: "Think before speaking.", builtin: true},
+            {id: "b7", title: "Smiling", text: "Your smile for your brother is charity.", source: "Jami at-Tirmidhi 1956", note: "Small acts of warmth matter.", builtin: true},
+            {id: "b8", title: "Cleanliness", text: "Purification is half of faith.", source: "Sahih Muslim 223", note: "Take care of cleanliness and wudu.", builtin: true},
+            {id: "b9", title: "Do not become angry", text: "A man asked the Prophet ﷺ for advice. He said: Do not become angry.", source: "Sahih al-Bukhari 6116", note: "Pause and respond calmly.", builtin: true},
+            {id: "b10", title: "Consistency", text: "The deeds most loved by Allah are those done regularly, even if they are few.", source: "Sahih al-Bukhari 6464; Sahih Muslim 783", note: "Build small, consistent habits.", builtin: true},
+            {id: "b11", title: "Helping others", text: "Allah helps the servant as long as the servant helps his brother.", source: "Sahih Muslim 2699", note: "Look for ways to help.", builtin: true},
+            {id: "b12", title: "Seeking knowledge", text: "Whoever follows a path in pursuit of knowledge, Allah will make easy for him a path to Paradise.", source: "Sahih Muslim 2699", note: "Keep learning with sincere intention.", builtin: true}
+        ];
+
+        // 8.3 Dua Collection
+        // Stores verified dua wording, transliteration, meanings, and references.
+        const DUAS = [
+            {
+                id: "d1",
+                category: "After Salah",
+                title: "Tasbih — SubhanAllah",
+                arabic: "سُبْحَانَ اللَّهِ",
+                trans: "SubhanAllah.",
+                meaning: "Glory be to Allah.",
+                source: "Sahih Muslim 596a",
+                count: "Recite 33 times after each obligatory prayer in the narration that pairs it with 33 times Alhamdulillah and 34 times Allahu Akbar."
+            },
+            {
+                id: "d2",
+                category: "After Salah",
+                title: "Tahmid — Alhamdulillah",
+                arabic: "الْحَمْدُ لِلَّهِ",
+                trans: "Alhamdulillah.",
+                meaning: "All praise belongs to Allah.",
+                source: "Sahih Muslim 596a",
+                count: "Recite 33 times after each obligatory prayer in this narrated form."
+            },
+            {
+                id: "d3",
+                category: "After Salah",
+                title: "Takbir — Allahu Akbar",
+                arabic: "اللَّهُ أَكْبَرُ",
+                trans: "Allahu Akbar.",
+                meaning: "Allah is the Greatest.",
+                source: "Sahih Muslim 596a",
+                count: "Recite 34 times after each obligatory prayer in this narrated form."
+            },
+            {
+                id: "d4",
+                category: "After Salah",
+                title: "Seeking Forgiveness",
+                arabic: "أَسْتَغْفِرُ اللَّهَ",
+                trans: "Astaghfirullah.",
+                meaning: "I seek forgiveness from Allah.",
+                source: "Sahih Muslim 591",
+                count: "Recite 3 times after the obligatory prayer."
+            },
+            {
+                id: "d5",
+                category: "After Salah",
+                title: "Dua After Salah",
+                arabic: "اللَّهُمَّ أَنْتَ السَّلَامُ وَمِنْكَ السَّلَامُ تَبَارَكْتَ يَا ذَا الْجَلَالِ وَالْإِكْرَامِ",
+                trans: "Allahumma antas-salamu wa minkas-salam, tabarakta ya dhal-jalali wal-ikram.",
+                meaning: "O Allah, You are Peace and from You comes peace. Blessed are You, Owner of majesty and honour.",
+                source: "Sahih Muslim 591"
+            },
+            {
+                id: "d6",
+                category: "Morning & Evening",
+                title: "Morning Dhikr",
+                arabic: "اللَّهُمَّ بِكَ أَصْبَحْنَا وَبِكَ أَمْسَيْنَا وَبِكَ نَحْيَا وَبِكَ نَمُوتُ وَإِلَيْكَ النُّشُورُ",
+                trans: "Allahumma bika asbahna wa bika amsayna, wa bika nahya wa bika namutu wa ilaykan-nushur.",
+                meaning: "O Allah, by You we enter the morning and evening, by You we live and die, and to You is the resurrection.",
+                source: "Jami at-Tirmidhi 3391",
+                count: "This is the morning wording. For the evening, the narration uses 'Allahumma bika amsayna wa bika asbahna ... wa ilaykal-masir.'"
+            },
+            {
+                id: "d7",
+                category: "Morning & Evening",
+                title: "Protection in Allah's Name",
+                arabic: "بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ",
+                trans: "Bismillahil-ladhi la yadurru ma'asmihi shay'un fil-ardi wa la fis-sama'i wa huwas-sami'ul-alim.",
+                meaning: "In the name of Allah, with whose name nothing on earth or in heaven can cause harm. He is the All-Hearing, the All-Knowing.",
+                source: "Sunan Abi Dawud 5088",
+                count: "Recite 3 times in the morning and 3 times in the evening."
+            },
+            {
+                id: "d8",
+                category: "Travel & Mosque",
+                title: "Seeking Refuge in Allah's Perfect Words",
+                arabic: "أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ",
+                trans: "A'udhu bi kalimatillahit-tammati min sharri ma khalaq.",
+                meaning: "I seek refuge in the perfect words of Allah from the evil of what He has created.",
+                source: "Sahih Muslim 2708",
+                count: "Reported for seeking protection when stopping at a place; no fixed count is specified here."
+            },
+            {
+                id: "d9",
+                category: "Morning & Evening",
+                title: "Sayyidul Istighfar — The Best Supplication for Forgiveness",
+                arabic: "اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَٰهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَىٰ عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ، وَأَبُوءُ بِذَنْبِي، فَاغْفِرْ لِي، فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ",
+                trans: "Allahumma anta Rabbi, la ilaha illa anta, khalaqtani wa ana abduka, wa ana 'ala 'ahdika wa wa'dika mastata'tu, a'udhu bika min sharri ma sana'tu, abu'u laka bini'matika 'alayya, wa abu'u bidhanbi, faghfir li, fa innahu la yaghfirudh-dhunuba illa anta.",
+                meaning: "O Allah, You are my Lord; none has the right to be worshipped except You. You created me and I am Your servant. I uphold Your covenant and promise as best I can. I seek refuge in You from the evil of what I have done. I acknowledge Your blessings upon me and confess my sin, so forgive me, for none forgives sins except You.",
+                source: "Sahih al-Bukhari 6306",
+                count: "Recite in the morning and evening."
+            },
+            {
+                id: "d10",
+                category: "Sleep",
+                title: "Before Sleeping",
+                arabic: "اللَّهُمَّ بِاسْمِكَ أَمُوتُ وَأَحْيَا",
+                trans: "Allahumma bismika amutu wa ahya.",
+                meaning: "O Allah, in Your name I die and I live.",
+                source: "Sahih al-Bukhari 6325"
+            },
+            {
+                id: "d11",
+                category: "Sleep",
+                title: "Upon Waking Up",
+                arabic: "الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ",
+                trans: "Alhamdu lillahil-ladhi ahyana ba'da ma amatana wa ilayhin-nushur.",
+                meaning: "All praise belongs to Allah, who gave us life after causing us to die (in sleep), and to Him is the resurrection.",
+                source: "Sahih al-Bukhari 6325"
+            },
+            {
+                id: "d12",
+                category: "Daily Life",
+                title: "Before Entering the Bathroom",
+                arabic: "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْخُبُثِ وَالْخَبَائِثِ",
+                trans: "Allahumma inni a'udhu bika minal-khubuthi wal-khaba'ith.",
+                meaning: "O Allah, I seek refuge in You from male and female evil beings.",
+                source: "Sahih al-Bukhari 142; Sahih Muslim 375"
+            },
+            {
+                id: "d13",
+                category: "Daily Life",
+                title: "When Leaving Home",
+                arabic: "بِسْمِ اللَّهِ تَوَكَّلْتُ عَلَى اللَّهِ وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+                trans: "Bismillah, tawakkaltu 'alallah, wa la hawla wa la quwwata illa billah.",
+                meaning: "In the name of Allah, I place my trust in Allah. There is no power and no strength except through Allah.",
+                source: "Sunan Abi Dawud 5095"
+            },
+            {
+                id: "d14",
+                category: "Daily Life",
+                title: "Remembering Allah When Entering Home",
+                arabic: "بِسْمِ اللَّهِ",
+                trans: "Bismillah.",
+                meaning: "In the name of Allah.",
+                source: "Sahih Muslim 2018",
+                count: "Mentioning Allah when entering the home is established in the hadith. This short wording is provided as the remembrance, not as a claim that it is the complete wording of the entire narration."
+            },
+            {
+                id: "d15",
+                category: "Food",
+                title: "Before Eating",
+                arabic: "بِسْمِ اللَّهِ",
+                trans: "Bismillah.",
+                meaning: "In the name of Allah.",
+                source: "Sahih al-Bukhari 5376; Sahih Muslim 2022"
+            },
+            {
+                id: "d16",
+                category: "Food",
+                title: "After Eating",
+                arabic: "الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنِي هَذَا وَرَزَقَنِيهِ مِنْ غَيْرِ حَوْلٍ مِنِّي وَلَا قُوَّةٍ",
+                trans: "Alhamdu lillahil-ladhi at'amani hadha wa razaqanihi min ghayri hawlin minni wa la quwwah.",
+                meaning: "All praise belongs to Allah, who fed me this and provided it for me without any power or strength from myself.",
+                source: "Sunan Abi Dawud 4023; Jami at-Tirmidhi 3458"
+            },
+            {
+                id: "d17",
+                category: "Fasting & Ramadan",
+                title: "When Breaking the Fast",
+                arabic: "ذَهَبَ الظَّمَأُ وَابْتَلَّتِ الْعُرُوقُ وَثَبَتَ الْأَجْرُ إِنْ شَاءَ اللَّهُ",
+                trans: "Dhahaba adh-dhama'u, wabtallatil-'uruqu, wa thabatal-ajru in sha Allah.",
+                meaning: "The thirst has gone, the veins are moistened, and the reward is confirmed, if Allah wills.",
+                source: "Sunan Abi Dawud 2357",
+                count: "This narration is graded hasan by some scholars, while its grading has been discussed by others."
+            },
+            {
+                id: "d18",
+                category: "Travel & Mosque",
+                title: "When Entering the Mosque",
+                arabic: "اللَّهُمَّ افْتَحْ لِي أَبْوَابَ رَحْمَتِكَ",
+                trans: "Allahumma iftah li abwaba rahmatik.",
+                meaning: "O Allah, open for me the gates of Your mercy.",
+                source: "Sahih Muslim 713"
+            },
+            {
+                id: "d19",
+                category: "Travel & Mosque",
+                title: "When Leaving the Mosque",
+                arabic: "اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنْ فَضْلِكَ",
+                trans: "Allahumma inni as'aluka min fadlik.",
+                meaning: "O Allah, I ask You for Your bounty.",
+                source: "Sahih Muslim 713"
+            },
+            {
+                id: "d20",
+                category: "Quranic Duas",
+                title: "Increase Me in Knowledge",
+                arabic: "رَبِّ زِدْنِي عِلْمًا",
+                trans: "Rabbi zidni 'ilma.",
+                meaning: "My Lord, increase me in knowledge.",
+                source: "Quran 20:114"
+            },
+            {
+                id: "d21",
+                category: "Quranic Duas",
+                title: "Dua for Ease and Clear Speech",
+                arabic: "رَبِّ اشْرَحْ لِي صَدْرِي وَيَسِّرْ لِي أَمْرِي وَاحْلُلْ عُقْدَةً مِنْ لِسَانِي يَفْقَهُوا قَوْلِي",
+                trans: "Rabbishrah li sadri, wa yassir li amri, wahlul 'uqdatan min lisani, yafqahu qawli.",
+                meaning: "My Lord, expand my chest, make my task easy for me, and loosen the knot from my tongue so that they may understand my speech.",
+                source: "Quran 20:25–28"
+            },
+            {
+                id: "d22",
+                category: "Quranic Duas",
+                title: "Good in This World and the Hereafter",
+                arabic: "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ",
+                trans: "Rabbana atina fid-dunya hasanatan wa fil-akhirati hasanatan wa qina 'adhaban-nar.",
+                meaning: "Our Lord, grant us good in this world and good in the Hereafter, and protect us from the punishment of the Fire.",
+                source: "Quran 2:201"
+            },
+            {
+                id: "d23",
+                category: "Quranic Duas",
+                title: "Dua for Parents",
+                arabic: "وَقُلْ رَبِّ ارْحَمْهُمَا كَمَا رَبَّيَانِي صَغِيرًا",
+                trans: "Wa qur rabbir-hamhuma kama rabbayani saghira.",
+                meaning: "And say: My Lord, have mercy upon them as they raised me when I was small.",
+                source: "Quran 17:24"
+            },
+            {
+                id: "d24",
+                category: "Quranic Duas",
+                title: "For Forgiveness and Mercy",
+                arabic: "رَبَّنَا ظَلَمْنَا أَنْفُسَنَا وَإِنْ لَمْ تَغْفِرْ لَنَا وَتَرْحَمْنَا لَنَكُونَنَّ مِنَ الْخَاسِرِينَ",
+                trans: "Rabbana zalamna anfusana wa in lam taghfir lana wa tarhamna lanakunanna minal-khasirin.",
+                meaning: "Our Lord, we have wronged ourselves. If You do not forgive us and have mercy on us, we will surely be among the losers.",
+                source: "Quran 7:23"
+            },
+            {
+                id: "d25",
+                category: "Fasting & Ramadan",
+                title: "Dua for Laylat al-Qadr",
+                arabic: "اللَّهُمَّ إِنَّكَ عَفُوٌّ تُحِبُّ الْعَفْوَ فَاعْفُ عَنِّي",
+                trans: "Allahumma innaka 'afuwwun tuhibbul-'afwa fa'fu 'anni.",
+                meaning: "O Allah, You are Most Forgiving and love forgiveness, so forgive me.",
+                source: "Jami at-Tirmidhi 3513"
+            },
+            {
+                id: "d26",
+                category: "After Salah",
+                title: "Tahlil — Declaration of Allah's Oneness",
+                arabic: "لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ",
+                trans: "La ilaha illallahu wahdahu la sharika lah, lahul-mulku wa lahul-hamdu wa huwa 'ala kulli shay'in qadir.",
+                meaning: "There is no god worthy of worship except Allah alone, without partner. His is the dominion and His is all praise, and He is capable of all things.",
+                source: "Sahih Muslim 597",
+                count: "This dhikr is reported among the remembrances said after the obligatory prayer."
+            },
+            {
+                id: "d27",
+                category: "After Salah",
+                title: "Help Me Remember You",
+                arabic: "اللَّهُمَّ أَعِنِّي عَلَىٰ ذِكْرِكَ وَشُكْرِكَ وَحُسْنِ عِبَادَتِكَ",
+                trans: "Allahumma a'inni 'ala dhikrika wa shukrika wa husni 'ibadatik.",
+                meaning: "O Allah, help me remember You, thank You, and worship You in the best manner.",
+                source: "Sunan Abi Dawud 1522; Sunan an-Nasa'i 1303"
+            },
+            {
+                id: "d28",
+                category: "Daily Life",
+                title: "When Leaving the Bathroom",
+                arabic: "غُفْرَانَكَ",
+                trans: "Ghufranak.",
+                meaning: "I seek Your forgiveness.",
+                source: "Sunan Abi Dawud 30"
+            },
+            {
+                id: "d29",
+                category: "Food",
+                title: "If You Forget to Say Bismillah Before Eating",
+                arabic: "بِسْمِ اللَّهِ أَوَّلَهُ وَآخِرَهُ",
+                trans: "Bismillahi awwalahu wa akhirahu.",
+                meaning: "In the name of Allah at its beginning and its end.",
+                source: "Sunan Abi Dawud 3767; Jami at-Tirmidhi 1858"
+            },
+            {
+                id: "d30",
+                category: "Quranic Duas",
+                title: "Dua of Prophet Yunus عليه السلام",
+                arabic: "لَا إِلَٰهَ إِلَّا أَنْتَ سُبْحَانَكَ إِنِّي كُنْتُ مِنَ الظَّالِمِينَ",
+                trans: "La ilaha illa anta subhanaka inni kuntu minaz-zalimin.",
+                meaning: "There is no god worthy of worship except You. Glory be to You! Indeed, I have been among the wrongdoers.",
+                source: "Quran 21:87"
+            },
+            {
+                id: "d31",
+                category: "Quranic Duas",
+                title: "Dua for Allah's Provision",
+                arabic: "رَبِّ إِنِّي لِمَا أَنْزَلْتَ إِلَيَّ مِنْ خَيْرٍ فَقِيرٌ",
+                trans: "Rabbi inni lima anzalta ilayya min khayrin faqir.",
+                meaning: "My Lord, I am truly in need of whatever good You send down to me.",
+                source: "Quran 28:24"
+            },
+            {
+                id: "d32",
+                category: "Quranic Duas",
+                title: "Keep Our Hearts Steadfast",
+                arabic: "رَبَّنَا لَا تُزِغْ قُلُوبَنَا بَعْدَ إِذْ هَدَيْتَنَا وَهَبْ لَنَا مِنْ لَدُنْكَ رَحْمَةً إِنَّكَ أَنْتَ الْوَهَّابُ",
+                trans: "Rabbana la tuzigh qulubana ba'da idh hadaytana wa hab lana min ladunka rahmah, innaka antal-Wahhab.",
+                meaning: "Our Lord, do not let our hearts deviate after You have guided us, and grant us mercy from Yourself. Surely, You are the Bestower.",
+                source: "Quran 3:8"
+            },
+            {
+                id: "d33",
+                category: "Quranic Duas",
+                title: "Dua for Righteous Family",
+                arabic: "رَبَّنَا هَبْ لَنَا مِنْ أَزْوَاجِنَا وَذُرِّيَّاتِنَا قُرَّةَ أَعْيُنٍ وَاجْعَلْنَا لِلْمُتَّقِينَ إِمَامًا",
+                trans: "Rabbana hab lana min azwajina wa dhurriyyatina qurrata a'yunin waj'alna lil-muttaqina imama.",
+                meaning: "Our Lord, grant us comfort in our spouses and children and make us examples for the righteous.",
+                source: "Quran 25:74"
+            },
+            {
+                id: "d34",
+                category: "Morning & Evening",
+                title: "Seeking Beneficial Knowledge and Good Provision",
+                arabic: "اللَّهُمَّ إِنِّي أَسْأَلُكَ عِلْمًا نَافِعًا وَرِزْقًا طَيِّبًا وَعَمَلًا مُتَقَبَّلًا",
+                trans: "Allahumma inni as'aluka 'ilman nafi'an, wa rizqan tayyiban, wa 'amalan mutaqabbalan.",
+                meaning: "O Allah, I ask You for beneficial knowledge, good provision, and deeds that are accepted.",
+                source: "Sunan Ibn Majah 925",
+                count: "Reported for recitation after the Fajr prayer."
+            },
+            {
+                id: "d35",
+                category: "Morning & Evening",
+                title: "Dua for Guidance and Contentment",
+                arabic: "اللَّهُمَّ إِنِّي أَسْأَلُكَ الْهُدَىٰ وَالتُّقَىٰ وَالْعَفَافَ وَالْغِنَىٰ",
+                trans: "Allahumma inni as'alukal-huda wat-tuqa wal-'afafa wal-ghina.",
+                meaning: "O Allah, I ask You for guidance, piety, chastity, and contentment.",
+                source: "Sahih Muslim 2721"
+            },
+            {
+                id: "d36",
+                category: "Travel & Mosque",
+                title: "Dua When Beginning a Journey",
+                arabic: "سُبْحَانَ الَّذِي سَخَّرَ لَنَا هَٰذَا وَمَا كُنَّا لَهُ مُقْرِنِينَ وَإِنَّا إِلَىٰ رَبِّنَا لَمُنْقَلِبُونَ",
+                trans: "Subhanalladhi sakhkhara lana hadha wa ma kunna lahu muqrinin, wa inna ila Rabbina lamunqalibun.",
+                meaning: "Glory be to Him who has subjected this to us, for we could not have done so ourselves. And surely, to our Lord we will return.",
+                source: "Quran 43:13–14"
+            },
+            {
+                id: "d37",
+                category: "Daily Life",
+                title: "When It Rains",
+                arabic: "اللَّهُمَّ صَيِّبًا نَافِعًا",
+                trans: "Allahumma sayyiban nafi'an.",
+                meaning: "O Allah, make it beneficial rain.",
+                source: "Sahih al-Bukhari 1032"
+            },
+            {
+                id: "d38",
+                category: "Daily Life",
+                title: "Seeking Refuge from Shaytan",
+                arabic: "أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ",
+                trans: "A'udhu billahi minash-shaytanir-rajim.",
+                meaning: "I seek refuge in Allah from Satan, the accursed.",
+                source: "Quran 16:98"
+            },
+            {
+                id: "d39",
+                category: "Quranic Duas",
+                title: "Dua for Forgiveness",
+                arabic: "رَبِّ اغْفِرْ وَارْحَمْ وَأَنْتَ خَيْرُ الرَّاحِمِينَ",
+                trans: "Rabbighfir warham wa anta khayrur-rahimin.",
+                meaning: "My Lord, forgive and have mercy, for You are the best of those who show mercy.",
+                source: "Quran 23:118"
+            },
+            {
+                id: "d40",
+                category: "Quranic Duas",
+                title: "Dua for Steadfastness",
+                arabic: "رَبَّنَا أَفْرِغْ عَلَيْنَا صَبْرًا وَتَوَفَّنَا مُسْلِمِينَ",
+                trans: "Rabbana afrigh 'alayna sabran wa tawaffana muslimin.",
+                meaning: "Our Lord, pour upon us patience and let us die as Muslims.",
+                source: "Quran 7:126"
+            },
+            {
+                id: "d41",
+                category: "Sleep",
+                title: "Ayat al-Kursi Before Sleeping",
+                arabic: "اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ وَلَا يَئُودُهُ حِفْظُهُمَا وَهُوَ الْعَلِيُّ الْعَظِيمُ",
+                trans: "Allahu la ilaha illa huwal-hayyul-qayyum. La ta'khudhuhu sinatun wa la nawm. Lahu ma fis-samawati wa ma fil-ard. Man dhal-ladhi yashfa'u 'indahu illa bi-idhnih. Ya'lamu ma bayna aydihim wa ma khalfahum. Wa la yuhituna bi-shay'im-min 'ilmihi illa bima sha'. Wasi'a kursiyyuhus-samawati wal-ard. Wa la ya'uduhu hifzuhuma wa huwal-'aliyyul-'azim.",
+                meaning: "Allah—there is no deity except Him, the Ever-Living, the Sustainer of all. Neither drowsiness nor sleep overtakes Him. To Him belongs whatever is in the heavens and the earth. Who can intercede with Him except by His permission? He knows what is before them and what is behind them, and they encompass nothing of His knowledge except what He wills. His Kursi extends over the heavens and the earth, and preserving them does not tire Him. He is the Most High, the Most Great.",
+                source: "Quran 2:255; Sahih al-Bukhari 2311",
+                count: "The hadith reports reciting the complete Ayat al-Kursi before sleeping."
+            },
+            {
+                id: "d42",
+                category: "Daily Life",
+                title: "Seeking Refuge from Worry and Distress",
+                arabic: "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْهَمِّ وَالْحَزَنِ وَالْعَجْزِ وَالْكَسَلِ وَالْجُبْنِ وَالْبُخْلِ وَضَلَعِ الدَّيْنِ وَغَلَبَةِ الرِّجَالِ",
+                trans: "Allahumma inni a'udhu bika minal-hammi wal-hazan, wal-'ajzi wal-kasal, wal-jubni wal-bukhl, wa dala'id-dayni wa ghalabatir-rijal.",
+                meaning: "O Allah, I seek refuge in You from worry and grief, from helplessness and laziness, from cowardice and miserliness, from the burden of debt and from being overpowered by people.",
+                source: "Sahih al-Bukhari 6369"
+            },
+            {
+                id: "d43",
+                category: "Morning & Evening",
+                title: "Asking Allah for Wellbeing",
+                arabic: "اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي الدُّنْيَا وَالْآخِرَةِ، اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي دِينِي وَدُنْيَايَ وَأَهْلِي وَمَالِي، اللَّهُمَّ اسْتُرْ عَوْرَاتِي وَآمِنْ رَوْعَاتِي، اللَّهُمَّ احْفَظْنِي مِنْ بَيْنِ يَدَيَّ وَمِنْ خَلْفِي وَعَنْ يَمِينِي وَعَنْ شِمَالِي وَمِنْ فَوْقِي وَأَعُوذُ بِعَظَمَتِكَ أَنْ أُغْتَالَ مِنْ تَحْتِي",
+                trans: "Allahumma inni as'alukal-'afwa wal-'afiyata fid-dunya wal-akhirah. Allahumma inni as'alukal-'afwa wal-'afiyata fi dini wa dunyaya wa ahli wa mali. Allahummastur 'awrati wa amin raw'ati. Allahummahfazni min bayni yadayya wa min khalfi wa 'an yamini wa 'an shimali wa min fawqi, wa a'udhu bi'azamatika an ughtala min tahti.",
+                meaning: "O Allah, I ask You for pardon and wellbeing in this world and the Hereafter. O Allah, I ask You for pardon and wellbeing in my religion, worldly life, family and property. O Allah, conceal my faults and calm my fears. Protect me from before me, behind me, on my right, on my left and above me; and I seek refuge in Your greatness from being taken unaware from beneath me.",
+                source: "Sunan Abi Dawud 5074; Sunan Ibn Majah 3871"
+            },
+            {
+                id: "d44",
+                category: "Quranic Duas",
+                title: "Dua for Parents and the Believers",
+                arabic: "رَبَّنَا اغْفِرْ لِي وَلِوَالِدَيَّ وَلِلْمُؤْمِنِينَ يَوْمَ يَقُومُ الْحِسَابُ",
+                trans: "Rabbana ighfir li wa liwalidayya wa lil-mu'minina yawma yaqumul-hisab.",
+                meaning: "Our Lord, forgive me, my parents and the believers on the Day when the account is established.",
+                source: "Quran 14:41"
+            }
+        ];
+
+        // 8.4 Date and Daily Data Helpers
+        // Creates a local date string and a blank structure for a new day.
+        function localDate(d = new Date()) {
+            return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0")
+        }
+
+        function emptyDay() {
+            return {
+                salah: {},
+                quran: {pages: 0, goal: 2, surah: ""},
+                habits: {},
+                ramadan: {},
+                taraweeh: "",
+                reflection: {done: "", missed: "", learn: "", improve: "", tomorrow: ""}
+            }
+        }
+
+        // Loads saved application data from the browser's local storage.
+        function loadStore() {
+            try {
+                const v = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+                return v && typeof v === "object" ? v : {}
+            } catch (e) {
+                return {}
+            }
+        }
+
+        // Stores the current application state and user-created items.
+        let store = loadStore(),
+            selectedDate = localDate(),
+            customHabits = [],
+            customHadiths = [];
+
+        // Loads custom habits saved in the browser.
+        try {
+            customHabits = JSON.parse(localStorage.getItem(STORAGE_KEY + "_habits") || "[]")
+        } catch (e) {}
+
+        // Loads custom Hadith entries saved in the browser.
+        try {
+            customHadiths = JSON.parse(localStorage.getItem(STORAGE_KEY + "_hadiths") || "[]")
+        } catch (e) {}
+
+        // Holds the prayer-time calendar returned by the API.
+        let calendarRows = [];
+
+        // Returns the selected day's data and creates missing fields when needed.
+        function day() {
+            if (!store[selectedDate]) store[selectedDate] = emptyDay();
+
+            const d = store[selectedDate];
+
+            d.salah = d.salah || {};
+            d.quran = d.quran || {pages: 0, goal: 2, surah: ""};
+            d.habits = d.habits || {};
+            d.ramadan = d.ramadan || {};
+            d.reflection = d.reflection || {done: "", missed: "", learn: "", improve: "", tomorrow: ""};
+
+            return d
+        }
+
+        // Saves daily data to local storage.
+        function persist() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(store))
+            } catch (e) {
+                toast("Could not save. Browser storage may be full or disabled.");
+            }
+        }
+
+        // Escapes special HTML characters before displaying user-provided text.
+        function safe(s) {
+            return String(s ?? "").replace(/[&<>"']/g, c => ({
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;"
+            }[c]))
+        }
+
+        // Calculates a percentage and updates a progress bar.
+        function percent(a, b) {
+            return b ? Math.round(a / b * 100) : 0
+        }
+
+        function setBar(id, p) {
+            const e = document.getElementById(id);
+            if (e) e.style.width = Math.max(0, Math.min(100, p)) + "%"
+        }
+
+        // Displays a temporary notification message.
+        function toast(msg) {
+            const t = document.getElementById("toast");
+            t.textContent = msg;
+            t.style.display = "block";
+            clearTimeout(window._toastTimer);
+            window._toastTimer = setTimeout(() => t.style.display = "none", 2500)
+        }
+
+        // 8.5 Navigation and Date Selection
+        // Switches between pages, updates navigation highlights, and refreshes content.
+        function showPage(id) {
+            document.querySelectorAll(".page").forEach(e => e.classList.remove("active"));
+            document.getElementById(id).classList.add("active");
+
+            document.querySelectorAll("[data-nav]").forEach(e => e.classList.toggle("active", e.dataset.nav === id));
+
+            renderAll();
+            window.scrollTo({top: 0, behavior: "smooth"});
+        }
+
+        // Changes the active date when a date input is updated.
+        function changeDate(v) {
+            if (!v) return;
+            selectedDate = v;
+            renderAll()
+        }
+
+        // Counts completed prayers and habits for the selected day.
+        function prayerCount() {
+            return PRAYERS.filter(p => day().salah[p] === "yes").length
+        }
+
+        function habitNames() {
+            return DEFAULT_HABITS.concat(customHabits)
+        }
+
+        function markedHabits() {
+            return habitNames().filter((h, i) => day().habits[habitKey(h, i)] === "yes").length
+        }
+
+        function habitKey(h, i) {
+            return "habit_" + i + "_" + h
+        }
+
+        // Updates a prayer status and saves the change.
+        function setPrayer(p, v) {
+            day().salah[p] = v;
+            persist();
+            renderAll()
+        }
+
+        // 8.6 Salah Rendering
+        // Displays the prayer status buttons and updates the prayer progress.
+        function renderSalah() {
+            const d = day(),
+                n = prayerCount(),
+                p = percent(n, 5);
+
+            document.getElementById("salahCount").textContent = n + " / 5";
+            document.getElementById("salahPercent").textContent = p + "%";
+            setBar("salahBar", p);
+
+            document.getElementById("salahList").innerHTML = PRAYERS.map(name => {
+                const s = d.salah[name] || "";
+
+                return `<div class="task-row">
+                    <div>
+                        <strong>${name}</strong>
+                        <div style="font-size:12px;color:var(--muted);margin-top:4px">${s === "yes" ? "Completed" : s === "no" ? "Not completed" : "Not marked"}</div>
+                    </div>
+                    <div style="display:flex;gap:5px">
+                        <button class="status ${s === "yes" ? "yes" : ""}" onclick="setPrayer('${name}','yes')">✓</button>
+                        <button class="status ${s === "no" ? "no" : ""}" onclick="setPrayer('${name}','no')">×</button>
+                        <button class="status" onclick="setPrayer('${name}','')">—</button>
+                    </div>
+                </div>`;
+            }).join("");
+
+            // Updates the prayer list displayed on the Dashboard.
+            document.getElementById("dashPrayerList").innerHTML = PRAYERS.map(p => `<div class="task-row">
+                <span>${p}</span>
+                <span>${d.salah[p] === "yes" ? "✓ Completed" : d.salah[p] === "no" ? "× Not completed" : "— Not marked"}</span>
+            </div>`).join("");
+        }
+
+        // 8.7 Quran Progress Functions
+        // Loads Quran data into the form and calculates reading progress.
+        function renderQuran() {
+            const q = day().quran;
+            q.pages = Math.max(0, Number(q.pages) || 0);
+            q.goal = Math.max(1, Number(q.goal) || 2);
+
+            document.getElementById("qPages").value = q.pages;
+            document.getElementById("qGoal").value = q.goal;
+            document.getElementById("qSurah").value = q.surah || "";
+
+            const p = percent(q.pages, q.goal);
+
+            document.getElementById("qProgress").textContent = q.pages + " / " + q.goal + " pages";
+            document.getElementById("qPercent").textContent = p + "%";
+            setBar("qBar", p);
+
+            document.getElementById("qMessage").textContent = q.pages >= q.goal
+                ? "Daily reading goal reached. Alhamdulillah!"
+                : (q.goal - q.pages) + " more page(s) to reach your goal.";
+
+            document.getElementById("dashPages").textContent = q.pages;
+            setBar("dashQuranBar", p);
+
+            document.getElementById("dashQuranText").textContent = q.pages + " of " + q.goal + " pages";
+            setBar("dashQuranDetail", p);
+        }
+
+        // Saves the user's Quran reading details for the selected date.
+        function saveQuran() {
+            const q = day().quran;
+
+            q.pages = Math.max(0, Math.min(604, parseInt(document.getElementById("qPages").value) || 0));
+            q.goal = Math.max(1, Math.min(604, parseInt(document.getElementById("qGoal").value) || 2));
+            q.surah = document.getElementById("qSurah").value.trim();
+
+            persist();
+            renderAll();
+            toast("Quran progress saved.");
+        }
+
+        // 8.8 Hadith Collection Functions
+        // Combines built-in Hadith entries with the user's custom entries.
+        function allHadiths() {
+            return DEFAULT_HADITHS.concat(customHadiths)
+        }
+
+        // Displays the saved Hadith collection.
+        function renderHadith() {
+            const list = allHadiths();
+
+            document.getElementById("hadithCount").textContent = list.length + " entries";
+
+            document.getElementById("hadithList").innerHTML = list.map(h => `
+                <article class="card">
+                    <div class="flex justify-between gap-3">
+                        <h2 class="serif text-2xl">${safe(h.title)}</h2>
+                        <span class="pill">${h.builtin ? "Collection" : "My entry"}</span>
+                    </div>
+
+                    <p style="line-height:1.9;font-size:17px;margin-top:12px">${safe(h.text)}</p>
+                    <p style="font-size:12px;color:var(--muted);margin-top:12px">Source: ${safe(h.source || "Not entered")}</p>
+
+                    ${h.note ? `<p style="background:var(--soft);padding:12px;border-radius:9px;margin-top:12px;font-size:13px">My note: ${safe(h.note)}</p>` : ""}
+
+                    ${!h.builtin ? `<div class="flex gap-2 mt-4">
+                        <button class="outline" onclick="editHadith('${h.id}')">Edit</button>
+                        <button class="outline" onclick="deleteHadith('${h.id}')">Delete</button>
+                    </div>` : ""}
+                </article>`).join("");
+        }
+
+        // Validates and saves a new Hadith entry.
+        function addHadith() {
+            const title = document.getElementById("hTitle").value.trim(),
+                text = document.getElementById("hText").value.trim(),
+                source = document.getElementById("hSource").value.trim(),
+                note = document.getElementById("hNote").value.trim();
+
+            if (!title || !text || !source) {
+                toast("Enter a title, hadith and source reference.");
+                return
+            }
+
+            customHadiths.push({
+                id: "custom_" + Date.now(),
+                title,
+                text,
+                source,
+                note,
+                builtin: false
+            });
+
+            localStorage.setItem(STORAGE_KEY + "_hadiths", JSON.stringify(customHadiths));
+            ["hTitle", "hText", "hSource", "hNote"].forEach(id => document.getElementById(id).value = "");
+            renderHadith();
+            toast("Added to your collection.");
+        }
+
+        // Allows the user to edit a custom Hadith entry.
+        function editHadith(id) {
+            const h = customHadiths.find(x => x.id === id);
+            if (!h) return;
+
+            const title = prompt("Edit title:", h.title);
+            if (title === null) return;
+
+            const text = prompt("Edit hadith text:", h.text);
+            if (text === null) return;
+
+            const source = prompt("Edit source reference:", h.source);
+            if (source === null) return;
+
+            const note = prompt("Edit personal note:", h.note || "");
+            if (note === null) return;
+
+            Object.assign(h, {
+                title: title.trim(),
+                text: text.trim(),
+                source: source.trim(),
+                note: note.trim()
+            });
+
+            localStorage.setItem(STORAGE_KEY + "_hadiths", JSON.stringify(customHadiths));
+            renderHadith();
+            toast("Hadith updated.");
+        }
+
+        // Deletes a custom Hadith after confirmation.
+        function deleteHadith(id) {
+            if (!confirm("Delete this saved hadith?")) return;
+
+            customHadiths = customHadiths.filter(x => x.id !== id);
+            localStorage.setItem(STORAGE_KEY + "_hadiths", JSON.stringify(customHadiths));
+
+            renderHadith();
+            toast("Hadith deleted.");
+        }
+
+        // 8.9 Dua Collection Functions
+        // Loads favourite duas and updates their favourite status.
+        function getDuaFavs() {
+            try {
+                return JSON.parse(localStorage.getItem(STORAGE_KEY + "_duafavs") || "[]")
+            } catch (e) {
+                return []
+            }
+        }
+
+        function toggleDuaFav(id) {
+            let f = getDuaFavs();
+            f = f.includes(id) ? f.filter(x => x !== id) : f.concat(id);
+
+            localStorage.setItem(STORAGE_KEY + "_duafavs", JSON.stringify(f));
+            renderDuas()
+        }
+
+        // Saves whether a dua has been read on the selected date.
+        function toggleDuaRead(id, checked) {
+            const key = STORAGE_KEY + "_duaread_" + selectedDate;
+            let r = [];
+
+            try {
+                r = JSON.parse(localStorage.getItem(key) || "[]")
+            } catch (e) {}
+
+            r = checked ? [...new Set(r.concat(id))] : r.filter(x => x !== id);
+            localStorage.setItem(key, JSON.stringify(r));
+            renderDuas()
+        }
+
+        // Filters duas by search term, category, and favourite status.
+        function renderDuas() {
+            const search = (document.getElementById("duaSearch").value || "").toLowerCase().trim();
+            const category = document.getElementById("duaCategory").value;
+            const favOnly = document.getElementById("duaFavOnly").checked;
+
+            const favs = getDuaFavs();
+            let read = [];
+
+            try {
+                read = JSON.parse(localStorage.getItem(STORAGE_KEY + "_duaread_" + selectedDate) || "[]")
+            } catch (e) {}
+
+            const list = DUAS.filter(d =>
+                (category === "all" || d.category === category) &&
+                (!favOnly || favs.includes(d.id)) &&
+                (!search || (d.title + " " + d.category + " " + d.trans + " " + d.meaning).toLowerCase().includes(search))
+            );
+
+            // Displays the filtered duas and their read/favourite controls.
+            document.getElementById("duaList").innerHTML = list.length ? list.map(d => `
+                <article class="card">
+                    <div class="flex justify-between items-start gap-3">
+                        <div>
+                            <span class="pill">${safe(d.category)}</span>
+                            <h2 class="serif text-xl mt-3">${safe(d.title)}</h2>
+                        </div>
+                        <button class="outline" onclick="toggleDuaFav('${d.id}')" aria-label="Toggle favourite">${favs.includes(d.id) ? "♥" : "♡"}</button>
+                    </div>
+
+                    <p class="arabic my-5">${safe(d.arabic)}</p>
+                    <p style="color:#927344;font-style:italic;line-height:1.8">${safe(d.trans)}</p>
+                    <p style="line-height:1.8;margin-top:10px">${safe(d.meaning)}</p>
+
+                    ${d.count ? `<p class="text-sm mt-3" style="background:var(--soft);padding:10px;border-radius:8px">${safe(d.count)}</p>` : ""}
+
+                    <p style="font-size:12px;color:var(--muted);margin-top:12px">Reference: ${safe(d.source)}</p>
+
+                    <label class="flex items-center gap-2 mt-4 text-sm">
+                        <input type="checkbox" ${read.includes(d.id) ? "checked" : ""} onchange="toggleDuaRead('${d.id}',this.checked)" style="accent-color:var(--gold)">
+                        Mark as read today
+                    </label>
+                </article>`).join("") : '<div class="card">No matching duas. Try another category or search term.</div>';
+        }
+
+        // 8.10 Daily Habit Tracker Functions
+        // Renders the habit list and calculates completion progress.
+        function renderHabits() {
+            const d = day(),
+                names = habitNames();
+
+            const yes = names.filter((h, i) => d.habits[habitKey(h, i)] === "yes").length;
+            const marked = names.filter((h, i) => ["yes", "no"].includes(d.habits[habitKey(h, i)])).length;
+
+            document.getElementById("habitCount").textContent = yes + " completed · " + marked + " marked";
+            setBar("habitBar", percent(yes, names.length));
+
+            document.getElementById("dashHabits").textContent = yes + " / " + names.length;
+            setBar("dashHabitsBar", percent(yes, names.length));
+
+            document.getElementById("habitList").innerHTML = names.map((h, i) => {
+                const key = habitKey(h, i),
+                    s = d.habits[key] || "",
+                    custom = i >= DEFAULT_HABITS.length;
+
+                return `<div class="task-row">
+                    <div style="flex:1">
+                        <span>${safe(h)}</span>
+                        ${custom ? '<span class="pill" style="margin-left:6px">Custom</span>' : ""}
+                        <div style="font-size:11px;color:var(--muted);margin-top:4px">${s === "yes" ? "Completed" : s === "no" ? "Not completed" : "Not marked"}</div>
+                    </div>
+
+                    <div style="display:flex;gap:5px;flex-shrink:0">
+                        <button class="status ${s === "yes" ? "yes" : ""}" onclick="setHabit(${i},'yes')">✓</button>
+                        <button class="status ${s === "no" ? "no" : ""}" onclick="setHabit(${i},'no')">×</button>
+                        <button class="status" onclick="setHabit(${i},'')">—</button>
+                        ${custom ? `<button class="outline" onclick="removeHabit(${i - DEFAULT_HABITS.length})">Delete</button>` : ""}
+                    </div>
+                </div>`;
+            }).join("");
+        }
+
+        // Updates a habit's status and saves the selected day's data.
+        function setHabit(i, v) {
+            const h = habitNames()[i];
+            day().habits[habitKey(h, i)] = v;
+            persist();
+            renderAll()
+        }
+
+        // Adds a new custom habit after checking that it is not empty or duplicated.
+        function addHabit() {
+            const input = document.getElementById("newHabit"),
+                v = input.value.trim();
+
+            if (!v) {
+                toast("Write a habit first.");
+                return
+            }
+
+            if (habitNames().some(h => h.toLowerCase() === v.toLowerCase())) {
+                toast("This habit already exists.");
+                return
+            }
+
+            customHabits.push(v);
+            localStorage.setItem(STORAGE_KEY + "_habits", JSON.stringify(customHabits));
+
+            input.value = "";
+            renderHabits();
+            renderDashboard();
+            toast("Habit added.");
+        }
+
+        // Removes a custom habit after confirmation.
+        function removeHabit(i) {
+            if (!confirm("Remove this custom habit? Its saved daily marks may remain in older records.")) return;
+
+            customHabits.splice(i, 1);
+            localStorage.setItem(STORAGE_KEY + "_habits", JSON.stringify(customHabits));
+
+            renderHabits();
+            renderDashboard();
+        }
+
+        // 8.11 Daily Reflection Functions
+        // Saves the user's achievements, unfinished tasks, lessons, and plans.
+        function saveReflection() {
+            const r = day().reflection;
+
+            r.done = document.getElementById("rDone").value;
+            r.missed = document.getElementById("rMissed").value;
+            r.learn = document.getElementById("rLearn").value;
+            r.improve = document.getElementById("rImprove").value;
+            r.tomorrow = document.getElementById("rTomorrow").value;
+
+            persist();
+            renderDashboard();
+            toast("Daily reflection saved.");
+        }
+
+        // Loads saved reflection text into the form for the selected date.
+        function renderReflection() {
+            const r = day().reflection;
+
+            document.getElementById("rDone").value = r.done || "";
+            document.getElementById("rMissed").value = r.missed || "";
+            document.getElementById("rLearn").value = r.learn || "";
+            document.getElementById("rImprove").value = r.improve || "";
+            document.getElementById("rTomorrow").value = r.tomorrow || "";
+        }
+
+        // 8.12 Ramadan Checklist Functions
+        // Displays and saves the daily Ramadan checklist.
+        function renderRamadanChecklist() {
+            const r = day().ramadan;
+
+            document.getElementById("ramadanChecklist").innerHTML = RAMADAN_TASKS.map((t, i) => `
+                <label class="task-row">
+                    <span>${safe(t)}</span>
+                    <input type="checkbox" ${r[i] ? "checked" : ""} onchange="setRamadanTask(${i},this.checked)" style="accent-color:var(--gold);width:18px;height:18px">
+                </label>`).join("");
+        }
+
+        function setRamadanTask(i, v) {
+            day().ramadan[i] = v;
+            persist();
+            renderRamadanChecklist()
+        }
+
+        // Displays the Taraweeh status buttons for the selected date.
+        function renderTaraweeh() {
+            const val = day().taraweeh || "";
+
+            document.getElementById("taraweehOptions").innerHTML = `
+                <div class="grid sm:grid-cols-3 gap-2">
+                    <button class="outline" style="${val === "yes" ? "background:var(--soft);border-color:var(--gold)" : ""}" onclick="setTaraweeh('yes')">✓ Prayed</button>
+                    <button class="outline" style="${val === "no" ? "background:#f6e7e1;border-color:#d9b8ae" : ""}" onclick="setTaraweeh('no')">× Not prayed</button>
+                    <button class="outline" style="${val === "" ? "background:var(--soft)" : ""}" onclick="setTaraweeh('')">— Clear</button>
+                </div>
+
+                <p class="text-sm text-gray-500 mt-3">${val === "yes" ? "Taraweeh marked as prayed." : val === "no" ? "Taraweeh marked as not prayed." : "No status marked yet."}</p>`;
+        }
+
+        // Saves the selected Taraweeh status.
+        function setTaraweeh(v) {
+            day().taraweeh = v;
+            persist();
+            renderTaraweeh();
+            toast("Taraweeh status updated.")
+        }
+
+        // 8.13 Dashboard Progress
+        // Calculates the overall daily completion percentage.
+        function renderDashboard() {
+            const d = day(),
+                n = prayerCount(),
+                names = habitNames(),
+                hYes = names.filter((h, i) => d.habits[habitKey(h, i)] === "yes").length;
+
+            document.getElementById("dashSalah").textContent = n + " / 5";
+            setBar("dashSalahBar", percent(n, 5));
+
+            const qDone = d.quran.pages >= d.quran.goal ? 1 : 0;
+
+            document.getElementById("dashTotal").textContent = percent(n + qDone + hYes, 5 + 1 + names.length) + "%";
+            setBar("dashTotalBar", percent(n + qDone + hYes, 5 + 1 + names.length));
+        }
+
+        // 8.14 Refresh All Website Sections
+        // Updates the date inputs and rerenders every section with the selected day's data.
+        function renderAll() {
+            document.getElementById("headerDate").textContent = new Date(selectedDate + "T12:00:00").toLocaleDateString("en-US", {
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+                year: "numeric"
+            });
+
+            ["mainDate", "salahDate", "quranDate", "reflectionDate", "taraweehDate"].forEach(id => document.getElementById(id).value = selectedDate);
+
+            renderSalah();
+            renderQuran();
+            renderDashboard();
+            renderHabits();
+            renderReflection();
+            renderRamadanChecklist();
+            renderTaraweeh();
+            renderHadith();
+            renderDuas();
+        }
+
+        // 8.15 Ramadan Calendar Controls
+        // Fills the month and year dropdowns with available options.
+        function initCalendarControls() {
+            const m = document.getElementById("ramadanMonth"),
+                y = document.getElementById("ramadanYear");
+
+            const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+            m.innerHTML = months.map((v, i) => `<option value="${i + 1}">${v}</option>`).join("");
+
+            const current = new Date();
+
+            for (let yr = current.getFullYear() - 2; yr <= current.getFullYear() + 8; yr++) {
+                y.add(new Option(String(yr), String(yr)))
+            }
+
+            m.value = String(current.getMonth() + 1);
+            y.value = String(current.getFullYear());
+        }
+
+        // Selects the current Gregorian month and loads its calendar.
+        function setCurrentMonth() {
+            const d = new Date();
+
+            document.getElementById("ramadanMonth").value = String(d.getMonth() + 1);
+            document.getElementById("ramadanYear").value = String(d.getFullYear());
+
+            loadRamadanCalendar()
+        }
+
+        // Removes extra information in parentheses from a prayer time.
+        function cleanTime(t) {
+            return String(t || "—").replace(/\s*\([^)]*\)/g, "").trim()
+        }
+
+        // 8.16 Load Ramadan Prayer Times from the Aladhan API
+        // Requests calendar data for the selected city, country, month, and year.
+        async function loadRamadanCalendar() {
+            const city = document.getElementById("ramadanCity").value.trim(),
+                country = document.getElementById("ramadanCountry").value.trim();
+
+            const month = document.getElementById("ramadanMonth").value,
+                year = document.getElementById("ramadanYear").value;
+
+            if (!city || !country) {
+                toast("Enter city and country.");
+                return
+            }
+
+            const status = document.getElementById("calendarStatus"),
+                body = document.getElementById("calendarBody");
+
+            status.textContent = "Loading calendar…";
+            body.innerHTML = '<tr><td colspan="5">Loading…</td></tr>';
+
+            // Builds the API URL using the selected calendar settings.
+            const url = `https://api.aladhan.com/v1/calendarByCity/${encodeURIComponent(year)}/${encodeURIComponent(month)}?city=${encodeURIComponent(city)}&country=${encodeURIComponent(country)}&method=1`;
+
+            try {
+                // Fetches the monthly prayer-time data from the API.
+                const response = await fetch(url);
+
+                if (!response.ok) throw new Error("Calendar request failed");
+
+                const json = await response.json();
+
+                if (json.code !== 200 || !Array.isArray(json.data)) throw new Error("No calendar data returned");
+
+                calendarRows = json.data;
+
+                // Creates a table row for every day in the selected month.
+                body.innerHTML = calendarRows.map(item => {
+                    const hijri = item.date.hijri || {},
+                        isRamadan = String(hijri.month?.number) === "9";
+
+                    const g = item.date.gregorian;
+                    const gregorian = `${g.day} ${g.month.en} ${g.year}`;
+
+                    return `<tr style="${isRamadan ? "background:#f0e8db" : ""}">
+                        <td>${safe(gregorian)}</td>
+                        <td>${safe(hijri.day || "")} ${safe(hijri.month?.en || "")} ${safe(hijri.year || "")}</td>
+                        <td><strong>${safe(cleanTime(item.timings?.Fajr))}</strong></td>
+                        <td><strong>${safe(cleanTime(item.timings?.Maghrib))}</strong></td>
+                        <td>${isRamadan ? '<span class="pill">Ramadan</span>' : '—'}</td>
+                    </tr>`;
+                }).join("");
+
+                // Counts Ramadan dates and displays a status message.
+                const ramadanDays = calendarRows.filter(x => String(x.date.hijri?.month?.number) === "9").length;
+
+                status.textContent = `Loaded ${calendarRows.length} days for ${city}, ${country}. ${ramadanDays ? ramadanDays + " Ramadan day(s) appear in this month." : "No Ramadan dates appear in this Gregorian month."}`;
+            } catch (e) {
+                // Shows an error message if the API request fails.
+                body.innerHTML = '<tr><td colspan="5">Unable to load the calendar. Check your internet connection and city/country names, then try again.</td></tr>';
+                status.textContent = "Calendar could not be loaded.";
+            }
+        }
+
+                // 8.18 Additional Local Storage Protection
+        // Automatically saves form data without removing existing features.
+
+        const HAYAT_SETTINGS_KEY = STORAGE_KEY + "_settings";
+
+        // Safely save additional settings to Local Storage.
+        function saveHayatSettings() {
+            try {
+                const settings = {
+                    city: document.getElementById("ramadanCity").value,
+                    country: document.getElementById("ramadanCountry").value,
+                    month: document.getElementById("ramadanMonth").value,
+                    year: document.getElementById("ramadanYear").value
+                };
+
+                localStorage.setItem(
+                    HAYAT_SETTINGS_KEY,
+                    JSON.stringify(settings)
+                );
+            } catch (error) {
+                toast("Settings could not be saved in this browser.");
+            }
+        }
+
+        // Restore previously saved settings after the calendar controls exist.
+        function restoreHayatSettings() {
+            try {
+                const settings = JSON.parse(
+                    localStorage.getItem(HAYAT_SETTINGS_KEY) || "null"
+                );
+
+                if (!settings) return;
+
+                if (settings.city !== undefined) {
+                    document.getElementById("ramadanCity").value = settings.city;
+                }
+
+                if (settings.country !== undefined) {
+                    document.getElementById("ramadanCountry").value = settings.country;
+                }
+
+                const month = document.getElementById("ramadanMonth");
+                const year = document.getElementById("ramadanYear");
+
+                if (
+                    settings.month !== undefined &&
+                    [...month.options].some(o => o.value === String(settings.month))
+                ) {
+                    month.value = String(settings.month);
+                }
+
+                // Add the saved year if it is outside the default year range.
+                if (
+                    settings.year !== undefined &&
+                    ![...year.options].some(o => o.value === String(settings.year))
+                ) {
+                    year.add(new Option(String(settings.year), String(settings.year)));
+                }
+
+                if (settings.year !== undefined) {
+                    year.value = String(settings.year);
+                }
+            } catch (error) {
+                console.warn("Could not restore Hayat settings.", error);
+            }
+        }
+
+        // Automatically save Quran form changes while typing.
+        // The existing Save Quran Progress button remains available.
+        ["qPages", "qGoal", "qSurah"].forEach(id => {
+            const input = document.getElementById(id);
+
+            input.addEventListener("input", function () {
+                const q = day().quran;
+
+                if (id === "qPages") {
+                    q.pages = Math.max(
+                        0,
+                        Math.min(604, Number(this.value) || 0)
+                    );
+                }
+
+                if (id === "qGoal") {
+                    q.goal = Math.max(
+                        1,
+                        Math.min(604, Number(this.value) || 2)
+                    );
+                }
+
+                if (id === "qSurah") {
+                    q.surah = this.value;
+                }
+
+                persist();
+            });
+
+            input.addEventListener("change", function () {
+                renderAll();
+            });
+        });
+
+        // Automatically save reflection text as the user types.
+        // Existing reflection fields and the Save button are unchanged.
+        const reflectionFields = {
+            rDone: "done",
+            rMissed: "missed",
+            rLearn: "learn",
+            rImprove: "improve",
+            rTomorrow: "tomorrow"
+        };
+
+        Object.entries(reflectionFields).forEach(([id, property]) => {
+            const input = document.getElementById(id);
+
+            input.addEventListener("input", function () {
+                day().reflection[property] = this.value;
+                persist();
+            });
+        });
+
+        // Save Ramadan settings whenever they are changed.
+        ["ramadanCity", "ramadanCountry", "ramadanMonth", "ramadanYear"]
+            .forEach(id => {
+                const input = document.getElementById(id);
+
+                input.addEventListener("input", saveHayatSettings);
+                input.addEventListener("change", saveHayatSettings);
+            });
+
+        // Restore settings after the existing initialization code runs.
+        // This does not remove or replace any existing initialization.
+        window.addEventListener("load", function () {
+            restoreHayatSettings();
+        });
+
+        // 8.16 Prayer Times feature.
+        // Uses the AlAdhan prayer-times API for the selected Bangladesh city and date.
+        const PRAYER_TIMES_SETTINGS_KEY = STORAGE_KEY + "_prayer_times_settings";
+
+        function restorePrayerTimesSettings() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(PRAYER_TIMES_SETTINGS_KEY) || "null");
+                const city = document.getElementById("prayerCity");
+                const date = document.getElementById("prayerTimesDate");
+                if (saved && saved.city && [...city.options].some(option => option.value === saved.city)) {
+                    city.value = saved.city;
+                }
+                date.value = saved && saved.date ? saved.date : selectedDate;
+            } catch (error) {
+                document.getElementById("prayerTimesDate").value = selectedDate;
+            }
+        }
+
+        function savePrayerTimesSettings() {
+            try {
+                localStorage.setItem(PRAYER_TIMES_SETTINGS_KEY, JSON.stringify({
+                    city: document.getElementById("prayerCity").value,
+                    date: document.getElementById("prayerTimesDate").value
+                }));
+            } catch (error) {
+                console.warn("Prayer times preferences could not be saved.", error);
+            }
+        }
+
+        function formatPrayerTime(time) {
+            if (!time) return "—";
+            return String(time).split(" ")[0];
+        }
+
+        async function loadPrayerTimes() {
+            const city = document.getElementById("prayerCity").value;
+            const dateValue = document.getElementById("prayerTimesDate").value;
+            const status = document.getElementById("prayerTimesStatus");
+            const list = document.getElementById("prayerTimesList");
+
+            if (!dateValue) {
+                status.textContent = "Please select a date.";
+                return;
+            }
+
+            savePrayerTimesSettings();
+            status.textContent = "Loading prayer times…";
+            list.innerHTML = '<p class="text-sm text-gray-500">Loading schedule…</p>';
+
+            const [year, month, dayNumber] = dateValue.split("-");
+            const apiDate = `${dayNumber}-${month}-${year}`;
+            const url = `https://api.aladhan.com/v1/timingsByCity/${encodeURIComponent(apiDate)}?city=${encodeURIComponent(city)}&country=Bangladesh&method=1`;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("Prayer-times service could not be reached.");
+                const result = await response.json();
+                if (result.code !== 200 || !result.data || !result.data.timings) {
+                    throw new Error("No prayer-time data was returned for this city.");
+                }
+
+                const timings = result.data.timings;
+                const names = [
+                    ["Fajr", timings.Fajr],
+                    ["Sunrise", timings.Sunrise],
+                    ["Dhuhr", timings.Dhuhr],
+                    ["Asr", timings.Asr],
+                    ["Maghrib", timings.Maghrib],
+                    ["Isha", timings.Isha]
+                ];
+
+                list.innerHTML = names.map(([name, time]) => `
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px;border:1px solid var(--line);border-radius:12px;background:#fbf8f2">
+                        <span style="font-weight:600">${name}</span>
+                        <span class="serif" style="font-size:20px;color:#806238">${formatPrayerTime(time)}</span>
+                    </div>
+                `).join("");
+
+                document.getElementById("prayerTimesLocation").textContent = `${city}, Bangladesh`;
+                document.getElementById("prayerTimesDateLabel").textContent =
+                    new Date(`${dateValue}T12:00:00`).toLocaleDateString("en-BD", {
+                        weekday: "long", day: "numeric", month: "long", year: "numeric"
+                    });
+                status.textContent = "Prayer times loaded successfully.";
+            } catch (error) {
+                list.innerHTML = '<p class="text-sm" style="color:#8e554a">Could not load prayer times. Check your internet connection and try again.</p>';
+                status.textContent = "Prayer times could not be loaded.";
+                console.error(error);
+            }
+        }
+
+        document.getElementById("prayerCity").addEventListener("change", savePrayerTimesSettings);
+        document.getElementById("prayerTimesDate").addEventListener("change", savePrayerTimesSettings);
+
+        // 8.17 Initialize the Website
+        // Prepares the calendar controls and displays the initial application data.
+        initCalendarControls();
+        renderAll();
+        restorePrayerTimesSettings();
+        if (!document.getElementById("prayerTimesDate").value) {
+            document.getElementById("prayerTimesDate").value = selectedDate;
+        }
+    </script>
+</body>
+
+</html>
