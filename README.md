@@ -20,6 +20,7 @@ The main idea behind this project is to bring useful Islamic features together i
 ## Technologies Used
 
 - HTML
+- CSS
 - Tailwind CSS
 - JavaScript
 
